@@ -31,3 +31,5 @@ backend/data/profile.json
 frontend/dist/
 *.png
 !demo/*.png
+
+!docs/preview.png
