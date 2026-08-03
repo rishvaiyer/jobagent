@@ -13,8 +13,10 @@ drafts; you review and approve.
 > [`jobagent/demo/index.html`](./demo/index.html). The instructions below are for the *real* app.
 >
 > **Instant preview** (no setup): https://unevil-warden-port2-production.up.railway.app/jobagent/
-> — a third-party CDN render of the committed demo file. The canonical home is GitHub Pages at
-> (Settings → Pages → Source: GitHub Actions).
+>
+> **Original home** (my earlier GitHub account, unevil-warden, since retired — kept as provenance):
+> https://raw.githack.com/unevil-warden/unevil/main/jobagent/demo/index.html and
+> https://unevil-warden.github.io/unevil/jobagent/
 
 ---
 
