@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Local data (never commit your DB, OAuth tokens, or secrets)
+backend/data/jobagent.db
+backend/data/gmail_token.json
+backend/data/app_settings.local.json
+backend/data/profile.local.json
+# Legacy paths from pre-local-storage releases; keep any migrated copies private.
+backend/data/app_settings.json
+backend/data/profile.json
+
+# Secrets
+.env
+*.local
+
+# OS
+.DS_Store
+
+# Render / screenshot artifacts
+frontend/dist/
+*.png
+!demo/*.png

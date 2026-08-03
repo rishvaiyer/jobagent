@@ -1,0 +1,10 @@
+.git
+.env
+backend/.venv
+backend/__pycache__
+backend/data/*.db
+backend/data/*.local.json
+backend/data/app_settings.json
+backend/data/profile.json
+frontend/node_modules
+frontend/dist

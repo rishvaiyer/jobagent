@@ -1,0 +1,27 @@
+{
+  "llm_api_key": "",
+  "model": "claude-opus-4-8",
+  "gmail_client_secret_path": "",
+  "gmail_token_path": "",
+  "max_jobs_per_search": 12,
+  "inbox_lookback_days": 14,
+  "search_filters": {
+    "remote_only": false,
+    "include_keywords": [],
+    "exclude_keywords": [],
+    "avoid_companies": [],
+    "enforce_min_salary": false,
+    "employment_type": "any"
+  },
+  "draft_style": {
+    "tone": "warm",
+    "length": "medium",
+    "signature": "",
+    "auto_draft_replies": false
+  },
+  "token_pricing": {
+    "claude-opus-4-8": { "input_per_1m": 5.0, "output_per_1m": 25.0 },
+    "claude-sonnet-4-6": { "input_per_1m": 3.0, "output_per_1m": 15.0 },
+    "claude-haiku-4-5": { "input_per_1m": 1.0, "output_per_1m": 5.0 }
+  }
+}

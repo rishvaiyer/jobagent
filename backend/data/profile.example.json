@@ -1,0 +1,12 @@
+{
+  "name": "Your Name",
+  "headline": "Software Engineer",
+  "summary": "Full-stack engineer with 4 years of experience building web apps in Python and React. Comfortable owning features end to end, from data model to UI.",
+  "skills": ["Python", "FastAPI", "React", "TypeScript", "SQL", "AWS"],
+  "target_roles": ["Software Engineer", "Full-Stack Engineer", "Backend Engineer"],
+  "target_locations": ["Remote", "San Francisco, CA"],
+  "min_salary": "$140k",
+  "seniority": "mid",
+  "preferences": "Prefer product-focused teams, remote-friendly, no on-call-heavy infra roles.",
+  "resume_text": "Replace this with your resume text. The agent uses it to match jobs and draft cover letters in your voice."
+}
