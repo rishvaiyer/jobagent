@@ -12,7 +12,7 @@ drafts; you review and approve.
 > There is also a static, sample-data **demo** of the interface (no backend, no real data) at
 > [`jobagent/demo/index.html`](./demo/index.html). The instructions below are for the *real* app.
 >
-> **Instant preview** (no setup): https://rishiyer.up.railway.app/jobagent/
+> **Instant preview** (no setup): https://rishva.up.railway.app/jobagent/
 >
 > **Original home** (my earlier GitHub account, unevil-warden, since retired — kept as provenance):
 > https://raw.githack.com/unevil-warden/unevil/main/jobagent/demo/index.html and
