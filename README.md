@@ -10,8 +10,8 @@ matched to your profile, drafts applications and email replies in your voice, an
 drafts; you review and approve.
 
 > There is also a static, sample-data **demo** of the interface (no backend, no real data) at
-> [`jobagent/demo/index.html`](./demo/index.html). The bare-bones annotated resume example is at
-> [`jobagent/demo/interview-guide.html`](./demo/interview-guide.html). Both use fictional data only.
+> [`jobagent/demo/index.html`](./demo/index.html). It is the full newest orange-and-black JobAgent UI,
+> running entirely on fictional browser-only data; the Interview guide is one of its tabs.
 >
 > **Instant preview** (no setup): open [`jobagent/demo/index.html`](./demo/index.html) locally or through GitHub Pages.
 
