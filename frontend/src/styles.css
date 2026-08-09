@@ -272,7 +272,16 @@
 .jcard .j-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; }
 .jcard .j-title { font-weight: 800; font-size: 15px; letter-spacing: -0.01em; }
 .jcard .j-sub { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
-.jcard .j-desc { font-size: 13px; color: var(--ink-2); margin-top: 12px; line-height: 1.55; }
+  .job-description { margin-top: 14px; padding: 12px 14px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-sm); }
+  .job-description-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .job-description-label { font-size: 10.5px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+  .job-description-toggle { display: inline-flex; align-items: center; gap: 5px; border: 0; padding: 2px 0; background: transparent; color: var(--pop-ink); font: 650 11.5px var(--font); cursor: pointer; }
+  .job-description-toggle:focus-visible { outline: 3px solid var(--pop-soft); outline-offset: 3px; border-radius: 4px; }
+  .job-description-caret { display: inline-block; font-size: 15px; line-height: 10px; transform: translateY(-1px); transition: transform .15s ease; }
+  .job-description-caret.is-open { transform: rotate(180deg) translateY(1px); }
+  .job-description-summary { display: grid; gap: 5px; margin: 9px 0 0 17px; padding: 0; color: var(--ink-2); font-size: 12.5px; line-height: 1.45; }
+  .job-description-summary li { padding-left: 2px; }
+  .job-description-full { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line-2); color: var(--ink-2); font-size: 13px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
 .jcard .j-reason { font-size: 12.5px; color: var(--muted); font-style: italic; margin-top: 9px; }
 .jcard .j-meta { display: flex; gap: 7px; margin-top: 10px; flex-wrap: wrap; align-items: center; }
 .draft-pre { white-space: pre-wrap; font-family: var(--font); font-size: 13.5px; line-height: 1.6; color: var(--ink); }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { api } from '../api.js'
+import JobDescription from './JobDescription.jsx'
 
 export default function Jobs({ ctx }) {
   const [jobs, setJobs] = useState([])
@@ -51,7 +52,7 @@ export default function Jobs({ ctx }) {
               <div className="score">{j.match_score}%</div>
             </div>
             {j.match_reason && <div className="j-reason">{j.match_reason}</div>}
-            {j.description && <div className="j-desc">{j.description}</div>}
+            <JobDescription description={j.description} />
             <div className="j-meta">
               <span className="tag">{j.apply_method === 'email' ? 'email apply' : 'web apply'}</span>
               {j.status === 'applied' && <span className="tag good">applied</span>}
