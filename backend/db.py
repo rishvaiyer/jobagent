@@ -33,21 +33,7 @@ def init_db():
 def _add_legacy_columns(db_engine=engine):
     """Apply additive changes to databases created by older JobAgent builds."""
     inspector = inspect(db_engine)
-    existing_tables = set(inspector.get_table_names())
-    quote = db_engine.dialect.identifier_preparer.quote
-
-    with db_engine.begin() as connection:
-        for table in Base.metadata.sorted_tables:
-            if table.name not in existing_tables:
-                continue
-            existing_columns = {
-                column["name"] for column in inspector.get_columns(table.name)
-            }
-            for column in table.columns:
-                if column.name in existing_columns:
-                    continue
-                column_type = column.type.compile(dialect=db_engine.dialect)
-                connection.execute(text(
-                    f"ALTER TABLE {quote(table.name)} ADD COLUMN "
-                    f"{quote(column.name)} {column_type}"
-                ))
+    agent_run_columns = {column["name"] for column in inspector.get_columns("agent_runs")}
+    if "mode" not in agent_run_columns:
+        with db_engine.begin() as connection:
+            connection.execute(text("ALTER TABLE agent_runs ADD COLUMN mode VARCHAR(20)"))
