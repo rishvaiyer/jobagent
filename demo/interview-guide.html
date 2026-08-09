@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JobAgent — Interview Guide Demo</title>
+  <style>
+    :root { color-scheme: light; --ink:#20252d; --muted:#68716c; --line:#e0e4df; --paper:#fff; --bg:#f7f7f4; --accent:#9f462f; --accent-soft:#f5e9e2; --tech:#eef3f0; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,sans-serif; }
+    main { max-width:900px; margin:0 auto; padding:42px 20px 70px; }
+    .eyebrow { color:var(--accent); font-size:11px; font-weight:800; letter-spacing:.15em; }
+    h1 { margin:8px 0 10px; font-size:clamp(30px,5vw,48px); line-height:1.05; letter-spacing:-.055em; }
+    .lede { max-width:670px; margin:0; color:var(--muted); font-size:17px; }
+    .notice { margin:24px 0 30px; padding:13px 15px; border:1px solid #dfc5b7; border-radius:9px; background:var(--accent-soft); color:#713b2c; }
+    .section { margin-top:32px; }
+    h2 { margin:0 0 11px; font-size:21px; letter-spacing:-.03em; }
+    .item { margin:10px 0; border:1px solid var(--line); border-radius:10px; background:var(--paper); box-shadow:0 5px 16px #26301808; }
+    summary { padding:16px 18px; cursor:pointer; font-weight:750; }
+    summary::marker { color:var(--accent); }
+    .detail { padding:0 18px 18px; border-top:1px solid #eef0ec; color:#56605a; }
+    .detail p { margin:15px 0; }
+    .detail strong, h3 { color:#2e3932; }
+    h3 { margin:16px 0 7px; font-size:13px; }
+    ul { margin:0; padding-left:20px; }
+    li { margin:5px 0; }
+    .techs { display:flex; flex-wrap:wrap; gap:7px; }
+    .tech { padding:6px 9px; border-radius:7px; background:var(--tech); color:#48564e; font-size:12px; }
+    .footer { margin-top:32px; color:var(--muted); font-size:13px; }
+    a { color:var(--accent); font-weight:700; }
+    @media (max-width:560px) { main { padding:28px 14px 48px; } summary { padding:14px; } .detail { padding:0 14px 14px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="eyebrow">JOBAGENT · INTERVIEW PREP</div>
+    <h1>Explain your work with confidence.</h1>
+    <p class="lede">A tiny, read-only example of an annotated resume page. Select any fictional resume line to see an interview blurb, talking prompts, and technology explanations.</p>
+    <div class="notice"><strong>Fictional demo only.</strong> Every person, company, metric, and project below is invented. Nothing is connected to a profile, application, inbox, or submission.</div>
+
+    <section class="section" aria-labelledby="summary-heading">
+      <h2 id="summary-heading">Summary</h2>
+      <details class="item">
+        <summary>Software developer with 4+ years delivering reliable workflow tools.</summary>
+        <div class="detail">
+          <p><strong>What it means:</strong> Taylor builds useful software and follows it through testing and support.</p>
+          <p><strong>Say it in an interview:</strong> “I turn messy operational needs into small, supportable software changes, then stay involved until the team can use them confidently.”</p>
+          <h3>Talking points</h3>
+          <ul><li>Start with the user problem before naming a framework.</li><li>Describe one change from discovery through validation.</li><li>Give a concrete outcome without claiming sole credit for a team result.</li></ul>
+          <h3>Technology, simply</h3>
+          <div class="techs"><span class="tech">workflow design · planning the steps work follows</span><span class="tech">production support · helping a live app keep working</span></div>
+        </div>
+      </details>
+    </section>
+
+    <section class="section" aria-labelledby="experience-heading">
+      <h2 id="experience-heading">Experience</h2>
+      <details class="item">
+        <summary>Automated Northstar Civic Systems’ permit intake checks, cutting review time from 45 minutes to 8.</summary>
+        <div class="detail">
+          <p><strong>What it means:</strong> Taylor replaced a repetitive manual check with a repeatable workflow that still flags exceptions for people.</p>
+          <p><strong>Say it in an interview:</strong> “I mapped the intake rules, added validation before the record was accepted, and kept an exception path so reviewers could handle unusual cases. The typical review went from about 45 minutes to 8.”</p>
+          <h3>Talking points</h3>
+          <ul><li>Explain how you learned the rules from the people doing the work.</li><li>Show why validation and exception handling belong together.</li><li>Use the before-and-after timing, and explain how it was checked.</li></ul>
+          <h3>Technology, simply</h3>
+          <div class="techs"><span class="tech">Python · a language for automation</span><span class="tech">PostgreSQL · a structured place to store records</span><span class="tech">validation · checking data against agreed rules</span></div>
+        </div>
+      </details>
+      <details class="item">
+        <summary>Led a staged release for a customer-notification integration.</summary>
+        <div class="detail">
+          <p><strong>What it means:</strong> Taylor connected two systems and released the change in a controlled way.</p>
+          <p><strong>Say it in an interview:</strong> “I clarified the message contract, tested the failure cases, and coordinated a staged release so we could observe the integration before expanding it.”</p>
+          <h3>Talking points</h3>
+          <ul><li>Name the contract each system needed to agree on.</li><li>Describe one failure case and its recovery path.</li><li>Explain what evidence made the next rollout safe.</li></ul>
+          <h3>Technology, simply</h3>
+          <div class="techs"><span class="tech">REST API · a standard way for systems to ask each other for data</span><span class="tech">staged rollout · releasing to a small group before everyone</span><span class="tech">monitoring · watching for unexpected behavior</span></div>
+        </div>
+      </details>
+    </section>
+
+    <section class="section" aria-labelledby="projects-heading">
+      <h2 id="projects-heading">Projects</h2>
+      <details class="item">
+        <summary>ParcelPilot · a personal package-tracking planner with explainable reminders.</summary>
+        <div class="detail">
+          <p><strong>What it means:</strong> Taylor built a small product that turns delivery events into reminders people can understand and review.</p>
+          <p><strong>Say it in an interview:</strong> “ParcelPilot is a fictional personal project I use to demonstrate event-driven design, clear state transitions, and user-visible explanations.”</p>
+          <h3>Talking points</h3>
+          <ul><li>Explain the difference between an event and the current state.</li><li>Show how a reminder can be useful without becoming an automatic action.</li><li>Describe what you would test when an event arrives twice.</li></ul>
+          <h3>Technology, simply</h3>
+          <div class="techs"><span class="tech">React · a tool for building interactive screens</span><span class="tech">TypeScript · JavaScript with extra mistake checks</span><span class="tech">event-driven · reacting to something that happened</span></div>
+        </div>
+      </details>
+    </section>
+
+    <p class="footer"><a href="index.html">← Back to the JobAgent demo</a> · Built with native HTML disclosures so keyboard and mobile users can open each explanation.</p>
+  </main>
+</body>
+</html>

@@ -10,13 +10,10 @@ matched to your profile, drafts applications and email replies in your voice, an
 drafts; you review and approve.
 
 > There is also a static, sample-data **demo** of the interface (no backend, no real data) at
-> [`jobagent/demo/index.html`](./demo/index.html). The instructions below are for the *real* app.
+> [`jobagent/demo/index.html`](./demo/index.html). The bare-bones annotated resume example is at
+> [`jobagent/demo/interview-guide.html`](./demo/interview-guide.html). Both use fictional data only.
 >
-> **Instant preview** (no setup): https://rishva.up.railway.app/jobagent/
->
-> **Original home** (my earlier GitHub account, unevil-warden, since retired — kept as provenance):
-> https://raw.githack.com/unevil-warden/unevil/main/jobagent/demo/index.html and
-> https://unevil-warden.github.io/unevil/jobagent/
+> **Instant preview** (no setup): open [`jobagent/demo/index.html`](./demo/index.html) locally or through GitHub Pages.
 
 ---
 
@@ -125,4 +122,4 @@ drafts; **Approve & send** is the only call that sends.
 
 ## Status
 
-In repo + live demo. Part of **unEvilGenius Labs** — local-first, privacy-respecting tools.
+In repo + static demo. This repository is a local-first, privacy-respecting example.
