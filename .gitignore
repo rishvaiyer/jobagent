@@ -33,3 +33,6 @@ frontend/dist/
 !demo/*.png
 
 !docs/preview.png
+!docs/dashboard.png
+!docs/applications.png
+!docs/resumes.png

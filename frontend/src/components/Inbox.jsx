@@ -123,14 +123,14 @@ export default function Inbox({ ctx }) {
                 {sel.draft.status !== 'sent' && (
                   <div className="actions">
                     <button className="btn good" disabled={busy === 'send' || busy === 'save'} onClick={sendReviewed}>
-                      {busy === 'send' ? '…' : 'Approve & send'}
+                      {busy === 'send' ? '…' : ctx.demo ? 'Mark reviewed (demo)' : 'Approve & send'}
                     </button>
                     <button className="btn" disabled={busy === 'save' || busy === 'send'} onClick={saveDraft}>{busy === 'save' ? 'Saving…' : 'Save edits'}</button>
                     <button className="btn" disabled={busy === 'redraft'} onClick={() => act(sel.id, 'redraft', api.draftReply, 'Redrafted')}>Redraft</button>
                   </div>
                 )}
                 <div className="notice" style={{ marginTop: 14 }}>
-                  Drafts are never sent on their own. {sel.draft.gmail_draft_id ? 'This was saved to your Gmail Drafts.' : 'Gmail isn’t connected, so this lives locally only.'}
+                  {ctx.demo ? 'Public demo: no mailbox is connected and no message can be sent.' : <>Drafts are never sent on their own. {sel.draft.gmail_draft_id ? 'This was saved to your Gmail Drafts.' : 'Gmail isn’t connected, so this lives locally only.'}</>}
                 </div>
               </div>
             ) : (

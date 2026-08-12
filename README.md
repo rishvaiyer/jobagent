@@ -1,125 +1,91 @@
 # JobAgent
 
-![JobAgent dashboard](docs/preview.png)
+![JobAgent public demo dashboard](docs/dashboard.png)
 
-A private, local-first job-search dashboard tied to a **Claude agent** that finds roles
-matched to your profile, drafts applications and email replies in your voice, and shows you
-— at a glance — what's been applied for and what still needs a response.
+JobAgent is a privacy-first job-search control center. This public build contains the complete product interface with fictional records and browser-memory interactions only.
 
-**Draft-and-approve. Local-first. Nothing is submitted or sent for you.** The agent queues
-drafts; you review and approve.
+[Open the public demo](https://rishva.up.railway.app/jobagent/)
 
-> There is also a static, sample-data **demo** of the interface (no backend, no real data) at
-> [`jobagent/demo/index.html`](./demo/index.html). It is the full newest orange-and-black JobAgent UI,
-> running entirely on fictional browser-only data; the Interview guide is one of its tabs.
->
-> **Instant preview** (no setup): open [`jobagent/demo/index.html`](./demo/index.html) locally or through GitHub Pages.
+The same mock-only build is checked in at [`demo/index.html`](./demo/index.html) for GitHub Pages or local preview.
 
----
+## Public demo safety
 
-## What it does
+- No personal applications, resumes, skills, email, profile data, or employment history.
+- No API keys, OAuth tokens, mailbox connections, uploads, or external writes.
+- No application is submitted and no message is sent.
+- Every company, role, receipt, filename, and activity record is synthetic.
+- Demo changes stay in memory and reset on reload.
+- Interview Prep, Briefs, and Interview Guide are intentionally excluded.
 
-- **Finds jobs** with Claude's web-search tool, matched and scored against your profile.
-- **Drafts applications** (cover letter + tailoring notes) grounded in your résumé.
-- **Lets you edit every draft before approval** — cover letters, tailoring notes, and email
-  replies remain fully reviewable, and Gmail is re-synced with the reviewed text before send.
-- **Reads your inbox** (Gmail), triaging threads into recruiter / interview / offer / rejection
-  / application-update and flagging which need a reply.
-- **Drafts email replies** in your voice and saves them as **Gmail drafts** (unsent).
-- **Tracks your pipeline** — open jobs, application drafts, applied, interviewing — plus the
-  follow-ups you owe (and that are owed to you).
-- **Keeps the queue tidy** — repeated clicks reuse an existing application draft instead of
-  creating duplicates, and dashboard follow-ups can be completed in place.
-- **Tunable** — Settings exposes job-search filters (remote-only, must-have / exclude keywords,
-  companies to avoid, employment type, enforce minimum salary) and draft style (tone, length,
-  email signature, and auto-draft replies right after a scan).
-- **Offline heuristics or real Claude** — runs fully without an API key (mock mode); add your
-  key for real search and drafting.
+## Included features
 
-## What it does NOT do
+- **Dashboard:** workflow counts, funnel, latest run, and receipt gate.
+- **Jobs:** synthetic role matching, saving, dismissing, and draft actions.
+- **Applications:** one-state workflow with posting, resume, requirements, cover-letter status, approval, and archive controls.
+- **Submission queue:** approved packets remain separate from confirmed applications.
+- **Needs your review:** unresolved questions can be answered once across matching mock records.
+- **Resume library:** main-resume, archive, restore, and add-mock-resume interactions without file uploads.
+- **Skills:** evidence-backed inventory, readiness labels, and claim guardrails.
+- **Inbox:** synthetic triage and reply-draft interaction with sending disabled.
+- **Models:** operator field guide for matching model and effort to a task.
+- **Settings:** public-safe provider states and mock agent controls.
+- **Activity:** visible mock runs, counts, and blockers.
 
-- Does **not** submit job applications on its own — you click **Approve & apply**.
-- Does **not** send email on its own — replies are created as **Gmail drafts**; the only send
-  path is the explicit **Approve & send** button.
-- Does **not** upload anything unless you configure an Anthropic key and/or Gmail.
-- Uses Gmail scopes limited to **readonly + compose + send** — no delete/modify.
+## UI screenshots
 
-## Privacy principles
+| Application workflow | Mock resume library |
+| --- | --- |
+| ![Application workflow](docs/applications.png) | ![Mock resume library](docs/resumes.png) |
 
-- All app data stays local (SQLite + JSON on your machine).
-- API keys, OAuth tokens, and your résumé/profile live in `*.local.json` files under
-  `backend/data/` and are gitignored. Tracked `*.example.json` files contain placeholders only.
-- Match scores and triage labels are **estimates** — review before acting.
-- Nothing leaves your machine in mock mode.
+## Truthful workflow states
 
----
-
-## Architecture
-
-```
-jobagent/
-  backend/   FastAPI + SQLite. Agent services in backend/services/ each have a
-             mock heuristic and a real-Claude path. Gmail wrapper with mock fallback.
-  frontend/  React + Vite dashboard (Dashboard / Jobs / Applications / Inbox / Settings).
-  demo/      Self-contained static demo for GitHub Pages.
+```text
+Needs preparation
+  -> Ready for your review
+  -> Needs your review, when an answer is missing
+  -> Submission queue
+  -> Submitting
+  -> Applied, only after a visible employer or ATS confirmation
 ```
 
-The agent is **on-demand**: the dashboard buttons (**Find jobs**, **Scan inbox**, **Draft
-replies**) trigger runs. Job search uses Claude's server-side `web_search` tool; drafting and
-inbox triage use structured Claude calls. Without an API key, every service falls back to a
-deterministic heuristic so the whole app — and the demo — works offline.
+An approval is permission to attempt a submission. It is not proof that the application was submitted. The duplicate gate keeps confirmed applications from being repeated.
 
----
+## Run locally
 
-## Run it
-
-### Backend (Python 3.11+)
+Requirements: Node.js 18 or newer.
 
 ```bash
-cd jobagent/backend
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-cd ..
-python -m backend.dev_seed                       # optional: synthetic jobs + inbox
-uvicorn backend.main:app --port 8001 --reload    # http://localhost:8001
-```
-
-`GET /health` reports `{"anthropic": false, "gmail": "mock"}` until you configure keys.
-
-### Frontend (Node 18+)
-
-```bash
-cd jobagent/frontend
+cd frontend
 npm install
-npm run dev                                       # http://localhost:5174 (proxies /api → :8001)
+npm run dev
 ```
 
-Open the app, go to **Settings**, and fill in your profile. Click **Find jobs** — in mock mode
-you'll get sample postings; the whole draft-and-approve workflow is fully exercisable offline.
+Open `http://127.0.0.1:5174/`. The interface uses the synthetic in-memory adapter in `frontend/src/api.js` and does not require the backend.
 
----
+Build verification:
 
-## Going live with Claude
+```bash
+cd frontend
+npm run build
+```
 
-In **Settings → Claude**, paste your Anthropic API key (stored locally in
-`backend/data/app_settings.local.json`, never committed) and pick a model (default
-`claude-opus-4-8`). **Find jobs** now performs real web search; drafts are written by Claude.
-Estimated token usage is tracked under Settings.
+## Repository layout
 
-## Going live with Gmail (one-time setup)
+```text
+frontend/
+  src/App.jsx                       Public demo shell and navigation
+  src/api.js                        Synthetic in-memory data adapter
+  src/components/WorkflowViews.jsx Workflow, queue, review, resume, skills, settings, activity
+  src/components/Jobs.jsx           Synthetic job discovery interface
+  src/components/Inbox.jsx          Synthetic inbox interface
+  src/components/Models.jsx         Model and effort field guide
+backend/                             Optional local FastAPI reference implementation
+docs/                                Current UI screenshots
+demo/                                Self-contained static mock build
+```
 
-1. In Google Cloud Console, create an **OAuth client ID** of type *Desktop app* and enable the
-   **Gmail API**. Download the `client_secret_*.json`.
-2. In **Settings → Gmail**, set **OAuth client-secret path** to that file and a **Token path**
-   (e.g. `backend/data/gmail_token.json`), then **Save**.
-3. The first **Scan inbox** opens a browser consent screen; after you approve, the token is
-   cached locally and reused. `/health` then reports `"gmail": "connected"`.
+## Privacy boundary
 
-Scopes requested: `gmail.readonly`, `gmail.compose`, `gmail.send`. Replies are created as
-drafts; **Approve & send** is the only call that sends.
+The public React app does not call `/api`. Its adapter returns fixed mock fixtures and keeps edits inside the current browser session. Provider inputs are disabled, resume upload is replaced with a synthetic card generator, inbox actions cannot send, and job links use `example.com`.
 
----
-
-## Status
-
-In repo + static demo. This repository is a local-first, privacy-respecting example.
+The optional backend is retained for local development. Do not expose a real-data configuration publicly without authentication, secret management, access controls, and a separate privacy review.
