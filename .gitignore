@@ -36,3 +36,13 @@ frontend/dist/
 !docs/dashboard.png
 !docs/applications.png
 !docs/resumes.png
+
+# Personal interview-prep material: never publish (positioning, scripted answers,
+# resume text, third-party names). Keep these local and untracked.
+frontend/src/prepData.js
+frontend/src/resumeStudyGuide.js
+frontend/src/quizletData.js
+frontend/src/quizlet.test.mjs
+frontend/src/components/Quizlet.jsx
+frontend/src/components/CallPreps.jsx
+frontend/src/App.local.jsx
