@@ -109,15 +109,38 @@ function ApplicationCard({ application, busy, approve, deny }) {
     <details className="packet-detail"><summary>Full demo packet</summary><p>{job.description}</p>{application.cover_letter && <p><b>Mock cover letter:</b> {application.cover_letter}</p>}</details>
     {workflowTab(application) === 'ready_for_review' && <div className="button-row"><button className="button approve" disabled={busy} onClick={approve}>{busy ? 'Processing…' : 'Approve and queue'}</button>{canDeny && <button className="button danger" disabled={busy} onClick={deny}>Archive</button>}</div>}
     {workflowTab(application) === 'approved_queued' && <div className="queue-line"><strong>Approved, not yet applied.</strong> The demo requires a mock receipt before changing this state.</div>}
-    {workflowTab(application) === 'applied' && <div className="confirmed-line">Confirmed: {application.submission_confirmation}</div>}
+    {workflowTab(application) === 'applied' && <EvidenceTimeline application={application} />}
   </article>
 }
 
-export function SubmissionQueue({ applications, onGo }) {
+function EvidenceTimeline({ application }) {
+  const events = application.evidence_events || []
+  const confirmation = application.submission_confirmation
+  return <details className="evidence-timeline" open>
+    <summary>Receipt-backed evidence</summary>
+    {confirmation && <div className="confirmed-line"><strong>{confirmation.confirmation_text}</strong><span>{confirmation.observed_at}</span><a href={confirmation.source_url} target="_blank" rel="noreferrer">Open synthetic source ↗</a></div>}
+    <ol>{events.map((event) => <li key={event.event_id}><b>{event.type.replaceAll('_', ' ')}</b><span>{event.detail}</span><small>{event.observed_at}</small></li>)}</ol>
+  </details>
+}
+
+export function SubmissionQueue({ applications, onUpdate, onGo, toast }) {
+  const [busy, setBusy] = useState('')
   const queued = applications.filter((application) => workflowTab(application) === 'approved_queued')
+  async function replayReceipt(application) {
+    setBusy(application.id)
+    try {
+      const updated = await api.confirmApplication(application.id, {
+        confirmation_text: `Mock ATS confirmation ${application.id.toUpperCase()}`,
+        source_url: `https://example.com/receipts/${application.id}`,
+        observed_at: new Date().toISOString(),
+      })
+      onUpdate((current) => replaceApplication(current, updated))
+      toast('Synthetic receipt observed. The evidence gate moved this record to Applied.')
+    } catch (error) { toast(error.message, 'error') } finally { setBusy('') }
+  }
   return <section><div className="section-head"><div><div className="eyebrow">SUBMISSION QUEUE</div><h1>Approved, not yet applied.</h1><p className="lede">Approval preserves a packet. Applied still requires visible confirmation, even in this mock workflow.</p></div><button className="button secondary" onClick={() => onGo('applications')}>Review applications →</button></div>
     <section className="queue-banner"><b>{queued.length} approved mock packet{queued.length === 1 ? '' : 's'} ready</b><span>Approval allows an attempt. It does not prove a submission.</span><div className="duplicate-gate"><span>Duplicate gate</span><b>On</b><small>Confirmed applications are not repeated.</small></div></section>
-    <div className="cards queue-rows">{queued.length ? queued.map((application) => <article className="application-card packet-card queue-row" key={application.id}><div className="queue-role"><div className="card-top"><span className="state-pill">Awaiting submission</span><span>{application.match_score}% match</span></div><h2>{application.job.title}</h2><p className="company">{application.job.company} · {application.job.location}</p></div><section className="queue-row-cell"><span>Packet</span><b>{application.selected_resume?.title}</b></section><section className="queue-row-cell"><span>Gate</span><div className="truth-gate"><b>Receipt required</b><span>Confirmation moves this to Applied.</span></div></section><section className="queue-row-cell"><span>Posting</span><a href={application.job.url} target="_blank" rel="noreferrer">Open demo posting ↗</a></section></article>) : <div className="empty">No mock packets are waiting.</div>}</div>
+    <div className="cards queue-rows">{queued.length ? queued.map((application) => <article className="application-card packet-card queue-row" key={application.id}><div className="queue-role"><div className="card-top"><span className="state-pill">Awaiting submission</span><span>{application.match_score}% match</span></div><h2>{application.job.title}</h2><p className="company">{application.job.company} · {application.job.location}</p></div><section className="queue-row-cell"><span>Packet</span><b>{application.selected_resume?.title}</b></section><section className="queue-row-cell"><span>Gate</span><div className="truth-gate"><b>Receipt required</b><span>Confirmation moves this to Applied.</span></div></section><section className="queue-row-cell"><span>Evidence replay</span><button className="button primary" disabled={busy === application.id} onClick={() => replayReceipt(application)}>{busy === application.id ? 'Recording…' : 'Replay synthetic receipt'}</button></section></article>) : <div className="empty">No mock packets are waiting.</div>}</div>
   </section>
 }
 

@@ -94,7 +94,7 @@ export default function App() {
       {tab === 'dashboard' && <WorkflowDashboard applications={applications} counts={counts} runs={runs} onGo={go} />}
       {tab === 'jobs' && <Jobs ctx={legacyContext} />}
       {tab === 'applications' && <WorkflowApplications applications={applications} counts={counts} onUpdate={setApplications} toast={toast} />}
-      {tab === 'submission_queue' && <SubmissionQueue applications={applications} onGo={go} />}
+      {tab === 'submission_queue' && <SubmissionQueue applications={applications} onUpdate={setApplications} onGo={go} toast={toast} />}
       {tab === 'needs_user_review' && <NeedsReview applications={applications} onUpdate={setApplications} toast={toast} />}
       {tab === 'resumes' && <ResumeLibrary resumes={resumes} onUpdate={setResumes} toast={toast} />}
       {tab === 'skills' && <SkillsLibrary skills={skills} onUpdate={setSkills} toast={toast} />}
