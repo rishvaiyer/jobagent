@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, func
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.db import Base
 
@@ -35,7 +35,7 @@ class Application(Base):
     __tablename__ = "applications"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     job_id: Mapped[int] = mapped_column(ForeignKey("jobs.id"))
-    # draft | submitted | interviewing | rejected | offer
+    # draft | approved_queued | submitted | interviewing | rejected | offer
     status: Mapped[str] = mapped_column(String(30), default="draft")
     draft_cover_letter: Mapped[str | None] = mapped_column(Text)
     draft_notes: Mapped[str | None] = mapped_column(Text)
@@ -48,6 +48,23 @@ class Application(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), onupdate=func.now())
     job: Mapped["Job"] = relationship(back_populates="applications")
+    evidence_events: Mapped[list["ApplicationEvidence"]] = relationship(
+        back_populates="application", cascade="all, delete-orphan"
+    )
+
+
+class ApplicationEvidence(Base):
+    __tablename__ = "application_evidence"
+    __table_args__ = (UniqueConstraint("application_id", "receipt_key"),)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    application_id: Mapped[int] = mapped_column(ForeignKey("applications.id"), index=True)
+    event_type: Mapped[str] = mapped_column(String(40), default="receipt_observed")
+    receipt_key: Mapped[str] = mapped_column(String(64))
+    confirmation_text: Mapped[str] = mapped_column(Text)
+    source_url: Mapped[str] = mapped_column(Text)
+    observed_at: Mapped[datetime] = mapped_column(DateTime)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())
+    application: Mapped["Application"] = relationship(back_populates="evidence_events")
 
 
 class EmailThread(Base):

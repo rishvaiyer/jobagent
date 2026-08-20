@@ -4,6 +4,7 @@ from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
+from backend.application_evidence import EvidenceError, has_receipt, record_receipt
 from backend.db import get_db, init_db
 from backend.models import (
     AgentRun, Application, EmailDraft, EmailThread, Followup, Job,
@@ -53,6 +54,8 @@ def job_dict(j: Job) -> dict:
 
 
 def application_dict(a: Application, job: Job | None = None) -> dict:
+    evidence_events = sorted(a.evidence_events, key=lambda event: event.observed_at)
+    latest_receipt = evidence_events[-1] if evidence_events else None
     return {
         "id": a.id, "job_id": a.job_id, "status": a.status,
         "draft_cover_letter": a.draft_cover_letter, "draft_notes": a.draft_notes,
@@ -64,6 +67,21 @@ def application_dict(a: Application, job: Job | None = None) -> dict:
         "job_location": (job.location if job else None),
         "job_url": (job.url if job else None),
         "apply_method": (job.apply_method if job else None),
+        "submission_confirmation": ({
+            "confirmation_text": latest_receipt.confirmation_text,
+            "source_url": latest_receipt.source_url,
+            "observed_at": latest_receipt.observed_at.isoformat() + "Z",
+        } if latest_receipt else None),
+        "evidence_events": [
+            {
+                "event_id": f"receipt:{event.id}",
+                "type": event.event_type,
+                "detail": event.confirmation_text,
+                "source_url": event.source_url,
+                "observed_at": event.observed_at.isoformat() + "Z",
+            }
+            for event in evidence_events
+        ],
     }
 
 
@@ -319,7 +337,7 @@ def list_applications(db: Session = Depends(get_db)):
     return out
 
 
-APPLICATION_STATUSES = {"draft", "submitted", "interviewing", "rejected", "offer"}
+APPLICATION_STATUSES = {"draft", "approved_queued", "submitted", "interviewing", "rejected", "offer"}
 
 
 @app.post("/applications/import")
@@ -330,6 +348,9 @@ def import_applications(payload: ApplicationImportIn, db: Session = Depends(get_
     for item in payload.applications:
         if item.status not in APPLICATION_STATUSES:
             raise HTTPException(422, f"Unsupported application status: {item.status}")
+        receipt_required = item.status not in {"draft", "approved_queued"}
+        if receipt_required and item.receipt is None:
+            raise HTTPException(422, f"Receipt evidence is required for {item.company}")
         external_key = item.url or f"manual:{item.company.strip().lower()}:{item.title.strip().lower()}"
         job = db.query(Job).filter(Job.external_key == external_key).first()
         if not job:
@@ -340,7 +361,7 @@ def import_applications(payload: ApplicationImportIn, db: Session = Depends(get_
                 url=item.url,
                 source=item.source,
                 external_key=external_key,
-                status="applied" if item.status != "draft" else "saved",
+                status="applied" if receipt_required else "saved",
                 apply_method="web",
             )
             db.add(job)
@@ -350,7 +371,7 @@ def import_applications(payload: ApplicationImportIn, db: Session = Depends(get_
             job.company = item.company.strip()
             job.location = item.location
             job.url = item.url
-            job.status = "applied" if item.status != "draft" else "saved"
+            job.status = "applied" if receipt_required else "saved"
 
         application = (
             db.query(Application)
@@ -358,32 +379,30 @@ def import_applications(payload: ApplicationImportIn, db: Session = Depends(get_
             .order_by(Application.created_at.desc())
             .first()
         )
-        submitted_at = None
-        if item.submitted_at:
-            try:
-                submitted_at = datetime.fromisoformat(item.submitted_at.replace("Z", "+00:00"))
-                submitted_at = submitted_at.replace(tzinfo=None)
-            except ValueError as exc:
-                raise HTTPException(422, f"Invalid submitted_at for {item.company}") from exc
-        elif item.status != "draft":
-            submitted_at = datetime.now(UTC).replace(tzinfo=None)
-
         if application:
             application.status = item.status
             application.draft_notes = item.notes
-            application.submitted_at = submitted_at
             updated += 1
         else:
-            db.add(Application(
+            application = Application(
                 job_id=job.id,
                 status=item.status,
                 draft_cover_letter="Application prepared." if item.status == "draft" else None,
                 draft_notes=item.notes,
                 confidence="verified",
                 mode="manual",
-                submitted_at=submitted_at,
-            ))
+            )
+            db.add(application)
             created += 1
+        db.flush()
+        if receipt_required:
+            try:
+                record_receipt(db, application, item.receipt.model_dump())
+            except EvidenceError as exc:
+                raise HTTPException(422, str(exc)) from exc
+            application.status = item.status
+        else:
+            application.submitted_at = None
     db.commit()
     return {"created": created, "updated": updated, "total": len(payload.applications)}
 
@@ -414,15 +433,23 @@ def update_application_status(
     application = db.get(Application, app_id)
     if not application:
         raise HTTPException(404, "Application not found")
-    application.status = payload.status
     job = db.get(Job, application.job_id)
-    if payload.status == "draft":
+    if payload.status in {"draft", "approved_queued"}:
+        if has_receipt(application):
+            raise HTTPException(409, "Receipt-backed applications cannot move to a pre-submission state")
+        application.status = payload.status
         application.submitted_at = None
         if job:
             job.status = "saved"
     else:
-        if not application.submitted_at:
-            application.submitted_at = datetime.now(UTC).replace(tzinfo=None)
+        if payload.receipt is not None:
+            try:
+                record_receipt(db, application, payload.receipt.model_dump())
+            except EvidenceError as exc:
+                raise HTTPException(422, str(exc)) from exc
+        elif not has_receipt(application):
+            raise HTTPException(409, "Receipt evidence is required before submitted")
+        application.status = payload.status
         if job:
             job.status = "applied"
     db.commit()
@@ -431,24 +458,26 @@ def update_application_status(
 
 @app.post("/applications/{app_id}/approve")
 def approve_application(app_id: int, db: Session = Depends(get_db)):
-    """Mark applied. For email-apply jobs, create an unsent Gmail draft. Never auto-sends."""
+    """Queue an approved packet. Approval is not submission evidence."""
     a = db.get(Application, app_id)
     if not a:
         raise HTTPException(404, "Application not found")
     job = db.get(Job, a.job_id)
-    a.status = "submitted"
-    a.submitted_at = datetime.now(UTC).replace(tzinfo=None)
+    if has_receipt(a):
+        raise HTTPException(409, "Receipt-backed applications are already submitted")
+    a.status = "approved_queued"
+    a.submitted_at = None
     if job:
-        job.status = "applied"
-    note = "Marked as applied."
+        job.status = "saved"
+    note = "Approved and queued. No submission is claimed without receipt evidence."
     if job and job.apply_method == "email" and job.apply_email:
         gmail_id = gmail_client.create_draft(
             {"sender": job.apply_email, "subject": f"Application — {job.title}", "gmail_thread_id": None},
             a.draft_cover_letter or "",
         )
         a.gmail_draft_id = gmail_id
-        note = ("Gmail draft created for review (not sent)." if gmail_id
-                else "Email-apply job — review the cover letter and send manually.")
+        note = ("Approved and queued; Gmail draft created for review, not sent." if gmail_id
+                else "Approved and queued; review and send the email manually.")
     db.commit()
     return {**application_dict(a, job), "note": note}
 

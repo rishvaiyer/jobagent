@@ -1,3 +1,5 @@
+import { answerReviewItem, queueApplication, recordApplicationReceipt } from './applicationState.js'
+
 const clone = (value) => JSON.parse(JSON.stringify(value))
 const pause = (value) => new Promise((resolve) => window.setTimeout(() => resolve(clone(value)), 90))
 
@@ -7,7 +9,7 @@ const resumes = [
   { id: 'resume-3', title: 'Data Platform', original_filename: 'demo-data-platform.pdf', is_main: false, is_archived: true, is_ready: true, quality_label: 'Mock · archived' },
 ]
 
-let applications = [
+export const publicApplicationFixtures = [
   {
     id: 'app-1', workflow_state: 'ready_for_review', match_score: 94,
     job: { title: 'Senior Backend Engineer', company: 'Northstar Labs', location: 'Remote', url: 'https://example.com/jobs/backend', posting_status: 'verified', posting_label: 'Demo posting', cover_letter_required: false, description: 'Build reliable services and developer tooling for a fictional workflow platform.', requirements: ['Production API design', 'Python or TypeScript', 'Cloud observability', 'Cross-functional delivery'] },
@@ -26,12 +28,14 @@ let applications = [
   {
     id: 'app-4', workflow_state: 'approved_queued', match_score: 91,
     job: { title: 'Full Stack Engineer', company: 'Signal Grove', location: 'Remote', url: 'https://example.com/jobs/full-stack', posting_status: 'verified', posting_label: 'Demo posting', cover_letter_required: false, description: 'Build a fictional operations console from API to interface.', requirements: ['React', 'Backend services', 'SQL', 'Testing'] },
-    selected_resume: resumes[0], review_items: [],
+    selected_resume: resumes[0], review_items: [], evidence_events: [{ event_id: 'queued:app-4', type: 'approved_queued', observed_at: '2026-08-19T13:42:00.000Z', detail: 'Approved for an attempt, not submitted' }],
   },
   {
     id: 'app-5', workflow_state: 'applied', match_score: 84,
     job: { title: 'Software Engineer', company: 'Lantern Systems', location: 'Boston, MA', url: 'https://example.com/jobs/software', posting_status: 'verified', posting_label: 'Demo posting', cover_letter_required: false, description: 'Synthetic applied-history record.', requirements: ['JavaScript', 'APIs', 'Databases', 'Testing'] },
-    selected_resume: resumes[0], review_items: [], submission_confirmation: 'Mock ATS receipt · DEMO-1042',
+    selected_resume: resumes[0], review_items: [],
+    submission_confirmation: { confirmation_text: 'Mock ATS receipt DEMO-1042', source_url: 'https://example.com/receipts/demo-1042', observed_at: '2026-08-19T13:44:00.000Z' },
+    evidence_events: [{ event_id: 'receipt:app-5:https://example.com/receipts/demo-1042|Mock ATS receipt DEMO-1042|2026-08-19T13:44:00.000Z', type: 'receipt_observed', observed_at: '2026-08-19T13:44:00.000Z', detail: 'Mock ATS receipt DEMO-1042', source_url: 'https://example.com/receipts/demo-1042' }],
   },
   {
     id: 'app-6', workflow_state: 'archived', match_score: 72,
@@ -39,6 +43,8 @@ let applications = [
     selected_resume: resumes[2], review_items: [],
   },
 ]
+
+let applications = clone(publicApplicationFixtures)
 
 let jobs = applications.slice(0, 4).map((application, index) => ({
   id: `job-${index + 1}`, ...application.job, match_score: application.match_score,
@@ -89,19 +95,20 @@ export const api = {
   runs: () => pause(runs),
   resumes: () => pause(resumes),
   skills: () => pause(skills),
-  approveApplication: (id) => updateApplication(id, (application) => ({ ...application, workflow_state: (application.review_items || []).some((item) => !item.answer) ? 'needs_user_review' : 'approved_queued' })),
+  approveApplication: (id) => updateApplication(id, (application) => queueApplication(application)),
   denyApplication: (id) => updateApplication(id, (application) => ({ ...application, workflow_state: 'archived' })),
   answerReviewGlobal: async (itemKey, answer) => {
     const updated = []
     applications = applications.map((application) => {
       const hasItem = (application.review_items || []).some((item) => item.item_key === itemKey && !item.answer)
       if (!hasItem) return application
-      const next = { ...application, workflow_state: 'approved_queued', review_items: application.review_items.map((item) => item.item_key === itemKey ? { ...item, answer } : item) }
+      const next = answerReviewItem(application, itemKey, answer)
       updated.push(next)
       return next
     })
     return pause({ applications: updated, updated_count: updated.length })
   },
+  confirmApplication: (id, receipt) => updateApplication(id, (application) => recordApplicationReceipt(application, receipt)),
   setMainResume: (id) => { resumes.forEach((resume) => { resume.is_main = resume.id === id }); return pause({ ok: true }) },
   setResumeArchived: (id, archived) => { const resume = resumes.find((item) => item.id === id); resume.is_archived = archived; return pause(resume) },
   addMockResume: (title) => { const resume = { id: `resume-${Date.now()}`, title: title || 'Demo Resume', original_filename: 'demo-resume.pdf', is_main: false, is_archived: false, is_ready: true, quality_label: 'Mock · one page' }; resumes.unshift(resume); return pause(resume) },
